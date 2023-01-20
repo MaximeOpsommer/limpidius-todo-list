@@ -8,7 +8,9 @@ export class TodolistController {
   constructor(private readonly todolistService: TodoListService) {}
 
   @Post('/')
-  public create(@Body() todolistPayload: TodolistPayload): Promise<TodoListDTO> {
+  public create(
+    @Body() todolistPayload: TodolistPayload,
+  ): Promise<TodoListDTO> {
     return this.todolistService.create(todolistPayload);
   }
 }
