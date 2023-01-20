@@ -1,12 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { BEARER } from '../src/app.constants';
+import { TodolistPayload } from '../src/todolist/todolist.payload';
+import { TodoListDTO } from '../src/todolist/todolist.dto';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
-describe('AppController (e2e)', () => {
+describe('TodoListController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -32,18 +34,21 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .set('Authorization', BEARER)
-      .expect(200)
-      .expect('Hello World!');
-  });
+  describe('Create a todolist', () => {
+    const url = '/todolist';
 
-  it('Should return 403 when Bearer is not valid', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .set('Authorization', 'Bearer limpidius_invalid_secret_api_key')
-      .expect(403);
+    it('Create a valid todolist', () => {
+      const payload =
+        require('./payload/create-todolist-payload.json') as TodolistPayload;
+      const expected =
+        require('./expected/created-todolist.json') as TodoListDTO;
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(201)
+        .expect(expected);
+    });
   });
 });

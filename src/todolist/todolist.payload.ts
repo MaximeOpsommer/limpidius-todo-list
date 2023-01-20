@@ -15,17 +15,15 @@ export class TodolistPayload {
   @ApiProperty()
   title: string;
 
-  @IsDefined()
   @IsArray()
-  @IsNotEmpty()
   @Type(() => TodoListPayloadItem)
   @ValidateNested()
   items: TodoListPayloadItem[];
 }
 
 export class TodoListPayloadItem {
-  @IsDefined()
   @IsString()
+  @IsNotEmpty()
   @ApiProperty({
     name: 'label',
     description: 'The todolist item label',
@@ -34,8 +32,8 @@ export class TodoListPayloadItem {
   })
   label: string;
 
-  @IsDefined()
   @IsString()
+  @IsNotEmpty()
   @ApiProperty({
     name: 'status',
     description: 'The todolist item status',

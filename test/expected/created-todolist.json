@@ -1,0 +1,14 @@
+{
+  "id": 1,
+  "title": "My TODO list",
+  "items": [
+    {
+      "label": "Task 1",
+      "status": "DONE"
+    },
+    {
+      "label": "Task 2",
+      "status": "TODO"
+    }
+  ]
+}

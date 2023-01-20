@@ -2,6 +2,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
+import { BEARER } from '../app.constants';
 
 @Injectable()
 export class TodolistAuthGuard extends AuthGuard('jwt') {
@@ -12,7 +13,7 @@ export class TodolistAuthGuard extends AuthGuard('jwt') {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const expectedBearer = 'Bearer limpidius_secret_api_key';
+    const expectedBearer = BEARER;
     const actualAuthorization = context.switchToHttp().getRequest().headers[
       'authorization'
     ];
