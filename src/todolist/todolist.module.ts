@@ -4,8 +4,9 @@ import { TodoList, TodoListSchema } from './todolist.schema';
 import { TodolistController } from './todolist.controller';
 import { TodoListService } from './todolist.service';
 import { Connection } from 'mongoose';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HeaderInterceptor } from '../app.header.interceptor';
+import { TodolistAuthGuard } from './todolist.auth.guard';
 
 @Module({
   imports: [
@@ -29,6 +30,10 @@ import { HeaderInterceptor } from '../app.header.interceptor';
     {
       provide: APP_INTERCEPTOR,
       useClass: HeaderInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: TodolistAuthGuard,
     },
   ],
 })
