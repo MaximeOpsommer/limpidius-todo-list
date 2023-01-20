@@ -48,7 +48,7 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect(400)
+        .expect(201)
         .expect(expected);
     });
 
@@ -82,6 +82,114 @@ describe('TodoListController (e2e)', () => {
       const payload = {
         title: ' ',
         items: [],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
+    });
+
+    it('Should throw a 400 error when todolist item label is null', () => {
+      const payload = {
+        title: 'test',
+        items: [
+          {
+            label: null,
+            status: 'DONE',
+          },
+        ],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
+    });
+
+    it('Should throw a 400 error when todolist item label is undefined', () => {
+      const payload = {
+        title: 'test',
+        items: [
+          {
+            label: undefined,
+            status: 'DONE',
+          },
+        ],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
+    });
+
+    it('Should throw a 400 error when todolist item label is empty', () => {
+      const payload = {
+        title: 'test',
+        items: [
+          {
+            label: ' ',
+            status: 'DONE',
+          },
+        ],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
+    });
+
+    it('Should throw a 400 error when todolist item status is null', () => {
+      const payload = {
+        title: 'test',
+        items: [
+          {
+            label: 'test',
+            status: null,
+          },
+        ],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
+    });
+
+    it('Should throw a 400 error when todolist item status is undefined', () => {
+      const payload = {
+        title: 'test',
+        items: [
+          {
+            label: 'test',
+            status: undefined,
+          },
+        ],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
+    });
+
+    it('Should throw a 400 error when todolist item status is invalid', () => {
+      const payload = {
+        title: 'test',
+        items: [
+          {
+            label: 'test',
+            status: 'INVALID',
+          },
+        ],
       };
 
       return request(app.getHttpServer())
