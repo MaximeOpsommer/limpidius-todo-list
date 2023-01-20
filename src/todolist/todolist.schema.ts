@@ -10,7 +10,7 @@ export class TodoList {
   @AutoMap()
   id: number;
 
-  @Prop()
+  @Prop({ type: String, trim: true })
   @AutoMap()
   title: string;
 
@@ -26,7 +26,7 @@ export class TodoList {
 }
 
 export class TodoListItem {
-  @Prop()
+  @Prop({ type: String, trim: true })
   @AutoMap()
   label: string;
 

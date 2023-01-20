@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
@@ -27,6 +27,7 @@ describe('TodoListController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
   });
 
@@ -47,8 +48,47 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect(201)
+        .expect(400)
         .expect(expected);
+    });
+
+    it('Should throw a 400 error when todolist title is null', () => {
+      const payload = {
+        title: null,
+        items: [],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
+    });
+
+    it('Should throw a 400 error when todolist title is undefined', () => {
+      const payload = {
+        title: undefined,
+        items: [],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
+    });
+
+    it('Should throw a 400 error when todolist title is empty', () => {
+      const payload = {
+        title: ' ',
+        items: [],
+      };
+
+      return request(app.getHttpServer())
+        .post(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(400);
     });
   });
 });
