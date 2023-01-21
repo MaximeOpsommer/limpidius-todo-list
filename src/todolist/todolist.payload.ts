@@ -8,6 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { TodoListItemStatus } from './todolist.schema';
 import { Transform, TransformFnParams, Type } from 'class-transformer';
+import { Types } from 'mongoose';
 
 export class TodolistPayload {
   @IsString()
@@ -22,12 +23,12 @@ export class TodolistPayload {
   title: string;
 
   @IsArray()
-  @Type(() => TodoListPayloadItem)
+  @Type(() => TodoListItemPayload)
   @ValidateNested()
-  items: TodoListPayloadItem[];
+  items: TodoListItemPayload[] | Types.ObjectId[];
 }
 
-export class TodoListPayloadItem {
+export class TodoListItemPayload {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({

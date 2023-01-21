@@ -14,6 +14,9 @@ export class TodoListDTO {
 
 export class TodoListItemDTO {
   @AutoMap()
+  id: number;
+
+  @AutoMap()
   label: string;
 
   @AutoMap()

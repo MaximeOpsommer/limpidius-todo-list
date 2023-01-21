@@ -1,12 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
 import { AutoMap } from '@automapper/classes';
+import mongoose, { HydratedDocument } from 'mongoose';
 
 export type TodoListDocument = HydratedDocument<TodoList>;
+export type TodoListItemDocument = HydratedDocument<TodoListItem>;
+
+@Schema()
+export class TodoListItem {
+  @Prop(Number)
+  @AutoMap()
+  id: number;
+
+  @Prop({ type: String, trim: true })
+  @AutoMap()
+  label: string;
+
+  @Prop(String)
+  @AutoMap()
+  status: TodoListItemStatus;
+}
 
 @Schema()
 export class TodoList {
-  @Prop()
+  @Prop(Number)
   @AutoMap()
   id: number;
 
@@ -14,27 +30,20 @@ export class TodoList {
   @AutoMap()
   title: string;
 
-  @Prop()
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TodoListItem' }],
+  })
   @AutoMap(() => TodoListItem)
   items: TodoListItem[];
 
-  @Prop()
+  @Prop(Date)
   createdAt: Date;
 
-  @Prop()
+  @Prop(Date)
   updatedAt: Date;
-}
-
-export class TodoListItem {
-  @Prop({ type: String, trim: true })
-  @AutoMap()
-  label: string;
-
-  @Prop()
-  @AutoMap()
-  status: TodoListItemStatus;
 }
 
 export type TodoListItemStatus = 'TODO' | 'DONE';
 
 export const TodoListSchema = SchemaFactory.createForClass(TodoList);
+export const TodoListItemSchema = SchemaFactory.createForClass(TodoListItem);

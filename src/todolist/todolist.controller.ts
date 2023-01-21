@@ -1,12 +1,12 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { TodoListService } from './todolist.service';
+import { TodolistService } from './todolist.service';
 import { TodoListDTO } from './todolist.dto';
 import { TodolistPayload } from './todolist.payload';
 import { TodolistAuthGuard } from './todolist.auth.guard';
 
 @Controller('/todolist')
 export class TodolistController {
-  constructor(private readonly todolistService: TodoListService) {}
+  constructor(private readonly todolistService: TodolistService) {}
 
   @UseGuards(TodolistAuthGuard)
   @Post('/')

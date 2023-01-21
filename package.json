@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config test/e2e/jest-e2e.json"
   },
   "dependencies": {
     "@automapper/classes": "^8.7.7",
@@ -68,13 +68,22 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "rootDir": ".",
+    "testRegex": ".*\\.(e2e-|)spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/**",
+      "!src/app.constants.ts",
+      "!src/app.header.interceptor.ts",
+      "!src/main.ts",
+      "!src/**/*.module.ts",
+      "!src/**/*.payload.ts",
+      "!src/**/*.schema.ts",
+      "!src/**/*.dto.ts",
+      "!src/**/*.mapper.ts",
+      "!src/**/*.auth.guard.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

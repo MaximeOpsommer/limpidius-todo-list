@@ -1,10 +1,10 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
-import { BEARER } from '../src/app.constants';
-import { TodolistPayload } from '../src/todolist/todolist.payload';
-import { TodoListDTO } from '../src/todolist/todolist.dto';
+import { AppModule } from '../../src/app.module';
+import { BEARER } from '../../src/app.constants';
+import { TodolistPayload } from '../../src/todolist/todolist.payload';
+import { TodoListDTO } from '../../src/todolist/todolist.dto';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
@@ -38,11 +38,11 @@ describe('TodoListController (e2e)', () => {
   describe('Create a todolist', () => {
     const url = '/todolist';
 
-    it('Create a valid todolist', () => {
+    it('Should create a valid todolist', () => {
       const payload =
-        require('./payload/create-todolist-payload.json') as TodolistPayload;
+        require('../payload/create-todolist-payload.json') as TodolistPayload;
       const expected =
-        require('./expected/created-todolist.json') as TodoListDTO;
+        require('../expected/created-todolist.json') as TodoListDTO;
 
       return request(app.getHttpServer())
         .post(url)
