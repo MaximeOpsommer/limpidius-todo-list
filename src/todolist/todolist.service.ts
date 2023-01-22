@@ -30,21 +30,17 @@ export class TodolistService {
         todoListItemPayload,
       );
       createdTodoListItem.save();
-      // TODO: return DBRef of _id
       return createdTodoListItem._id;
     });
     const createdTodolist = new this.todoListModel(todoListPayload);
     const date = new Date();
     createdTodolist.createdAt = date;
     createdTodolist.updatedAt = date;
-    await createdTodolist.save(() => {
-      this.todoListModel
-        .findById(createdTodolist._id)
-        .populate('items')
-        .then((result) => {
-          console.log(result);
-        });
-    });
-    return mapper.map(createdTodolist.toObject(), TodoList, TodoListDTO);
+    await createdTodolist.save();
+    return mapper.map(
+      (await createdTodolist.populate('items')).toObject(),
+      TodoList,
+      TodoListDTO,
+    );
   }
 }
