@@ -53,4 +53,22 @@ export class TodolistService {
       TodoListDTO,
     );
   }
+
+  async delete(todoListId: number): Promise<TodoListDTO> {
+    const deletedTodoList = await this.todoListModel
+      .findOneAndDelete({
+        id: todoListId,
+      })
+      .exec();
+    if (!deletedTodoList) {
+      throw new NotFoundException(
+        `TodoList with ID ${todoListId} does not exist`,
+      );
+    }
+    return mapper.map(
+      (await deletedTodoList.populate('items')).toObject(),
+      TodoList,
+      TodoListDTO,
+    );
+  }
 }

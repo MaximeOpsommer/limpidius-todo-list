@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -32,5 +33,15 @@ export class TodolistController {
       throw new BadRequestException(`Given todolist ID is not a number`);
     }
     return this.todolistService.getById(id);
+  }
+
+  @UseGuards(TodolistAuthGuard)
+  @Delete('/:id')
+  public delete(@Param('id') todolistId: string): Promise<TodoListDTO> {
+    const id: number = parseInt(todolistId);
+    if (isNaN(id)) {
+      throw new BadRequestException(`Given todolist ID is not a number`);
+    }
+    return this.todolistService.delete(id);
   }
 }
