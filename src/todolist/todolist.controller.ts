@@ -1,4 +1,12 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { TodolistService } from './todolist.service';
 import { TodoListDTO } from './todolist.dto';
 import { TodolistPayload } from './todolist.payload';
@@ -14,5 +22,15 @@ export class TodolistController {
     @Body() todolistPayload: TodolistPayload,
   ): Promise<TodoListDTO> {
     return this.todolistService.create(todolistPayload);
+  }
+
+  @UseGuards(TodolistAuthGuard)
+  @Get('/:id')
+  public getById(@Param('id') todolistId: string): Promise<TodoListDTO> {
+    const id: number = parseInt(todolistId);
+    if (isNaN(id)) {
+      throw new BadRequestException(`Given todolist ID is not a number`);
+    }
+    return this.todolistService.getById(id);
   }
 }

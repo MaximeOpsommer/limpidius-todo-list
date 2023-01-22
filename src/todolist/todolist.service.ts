@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   TodoList,
   TodoListDocument,
@@ -37,8 +37,18 @@ export class TodolistService {
     createdTodolist.createdAt = date;
     createdTodolist.updatedAt = date;
     await createdTodolist.save();
+    return this.getById(createdTodolist.id);
+  }
+
+  async getById(todoListId: number): Promise<TodoListDTO> {
+    const todoList = await this.todoListModel.findOne({ id: todoListId });
+    if (!todoList) {
+      throw new NotFoundException(
+        `TodoList with ID ${todoListId} does not exist`,
+      );
+    }
     return mapper.map(
-      (await createdTodolist.populate('items')).toObject(),
+      (await todoList.populate('items')).toObject(),
       TodoList,
       TodoListDTO,
     );

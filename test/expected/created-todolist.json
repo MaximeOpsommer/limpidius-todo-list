@@ -3,10 +3,12 @@
   "title": "My TODO list",
   "items": [
     {
+      "id": 1,
       "label": "Task 1",
       "status": "DONE"
     },
     {
+      "id": 2,
       "label": "Task 2",
       "status": "TODO"
     }
