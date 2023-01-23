@@ -1,12 +1,17 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { BEARER } from '../../src/app.constants';
-import { TodoListCreatePayload } from '../../src/todolist/todolist.payload';
-import { TodoListDTO } from '../../src/todolist/todolist.dto';
+import {
+  TodoListCreatePayload,
+  TodoListItemStatusPayload,
+  TodoListUpdatePayload,
+} from '../../src/todolist/todolist.payload';
+import { TodoListDTO, TodoListItemDTO } from '../../src/todolist/todolist.dto';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import setTimeout = jest.setTimeout;
 
 describe('TodoListController (e2e)', () => {
   let app: INestApplication;
@@ -48,11 +53,8 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect((res) => {
-          expect(res.status).toBe(201);
-          expect(res.body.items).toHaveLength(2);
-          expect(res.body).toEqual(expected);
-        });
+        .expect(HttpStatus.CREATED)
+        .expect(expected);
     });
 
     it('Should throw a 400 error when todolist title is null', () => {
@@ -65,7 +67,7 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('Should throw a 400 error when todolist title is undefined', () => {
@@ -78,7 +80,7 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('Should throw a 400 error when todolist title is empty', () => {
@@ -91,7 +93,7 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('Should throw a 400 error when todolist item label is null', () => {
@@ -109,7 +111,7 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('Should throw a 400 error when todolist item label is undefined', () => {
@@ -127,7 +129,7 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('Should throw a 400 error when todolist item label is empty', () => {
@@ -145,7 +147,191 @@ describe('TodoListController (e2e)', () => {
         .post(url)
         .set('Authorization', BEARER)
         .send(payload)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+  });
+
+  describe('Update a todolist', () => {
+    const todoListId = 1;
+    const url = `/todolist/${todoListId}`;
+
+    it('Should update a todolist', async () => {
+      const payload =
+        require('../payload/update-todolist-payload.json') as TodoListUpdatePayload;
+      const expected =
+        require('../expected/updated-todolist.json') as TodoListDTO;
+
+      return request(app.getHttpServer())
+        .patch(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.OK)
+        .expect(expected);
+    });
+
+    it('Should throw a 400 error when todolist title is null', () => {
+      const payload = {
+        title: null,
+        items: [],
+      };
+
+      return request(app.getHttpServer())
+        .patch(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 400 error when todolist title is undefined', () => {
+      const payload = {
+        title: undefined,
+        items: [],
+      };
+
+      return request(app.getHttpServer())
+        .patch(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 400 error when todolist title is empty', () => {
+      const payload = {
+        title: ' ',
+        items: [],
+      };
+
+      return request(app.getHttpServer())
+        .patch(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 400 error given ID is not a number', () => {
+      const payload = {
+        title: 'test',
+        items: [],
+      };
+
+      return request(app.getHttpServer())
+        .patch('/todolist/invalid-id')
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 404 error given ID does not exist', () => {
+      const payload = {
+        title: 'test',
+        items: [],
+      };
+
+      return request(app.getHttpServer())
+        .patch('/todolist/10')
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('List all todolists', () => {
+    const url = '/todolist';
+
+    it('Should list all todolists', async () => {
+      const expected =
+        require('../expected/updated-todolist.json') as TodoListDTO;
+
+      return request(app.getHttpServer())
+        .get(url)
+        .set('Authorization', BEARER)
+        .expect(HttpStatus.OK)
+        .expect([expected]);
+    });
+  });
+
+  describe('Get todolist by ID', () => {
+    const todoListId = 1;
+    const url = `/todolist/${todoListId}`;
+
+    it('Should retrieve todolist', async () => {
+      const expected =
+        require('../expected/updated-todolist.json') as TodoListDTO;
+
+      return request(app.getHttpServer())
+        .get(url)
+        .set('Authorization', BEARER)
+        .expect(HttpStatus.OK)
+        .expect(expected);
+    });
+
+    it('Should throw a 400 error when given ID is not a number', () => {
+      return request(app.getHttpServer())
+        .get('/todolist/invalid-id')
+        .set('Authorization', BEARER)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 404 error when given ID does not exist', () => {
+      return request(app.getHttpServer())
+        .get('/todolist/10')
+        .set('Authorization', BEARER)
+        .expect(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('Update item status', () => {
+    const todoListId = 1;
+    const todoListItemId = 2;
+    const url = `/todolist/${todoListId}/item/${todoListItemId}`;
+
+    it('Should update todolist item status', async () => {
+      const payload =
+        require('../payload/update-todolist-item-status-payload.json') as TodoListItemStatusPayload;
+      const expected =
+        require('../expected/updated-todolist-item-status.json') as TodoListItemDTO;
+
+      return request(app.getHttpServer())
+        .patch(url)
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.OK)
+        .expect(expected);
+    });
+  });
+
+  describe('Delete todolist', () => {
+    it('Should delete a todolist', async () => {
+      const expected =
+        require('../expected/deleted-todolist.json') as TodoListDTO;
+
+      const createPayload = require('../payload/create-todolist-to-delete-payload.json');
+      await request(app.getHttpServer())
+        .post('/todolist')
+        .set('Authorization', BEARER)
+        .send(createPayload);
+
+      setTimeout(2000);
+
+      return request(app.getHttpServer())
+        .delete('/todolist/2')
+        .set('Authorization', BEARER)
+        .expect(HttpStatus.OK)
+        .expect(expected);
+    });
+
+    it('Should throw a 400 error when given ID is not a number', () => {
+      return request(app.getHttpServer())
+        .delete('/todolist/invalid-id')
+        .set('Authorization', BEARER)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 404 error when given ID does not exist', () => {
+      return request(app.getHttpServer())
+        .delete('/todolist/10')
+        .set('Authorization', BEARER)
+        .expect(HttpStatus.NOT_FOUND);
     });
   });
 });

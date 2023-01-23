@@ -10,9 +10,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { TodolistService } from './todolist.service';
-import { TodoListDTO } from './todolist.dto';
+import { TodoListDTO, TodoListItemDTO } from './todolist.dto';
 import {
   TodoListCreatePayload,
+  TodoListItemStatusPayload,
   TodoListUpdatePayload,
 } from './todolist.payload';
 import { TodoListAuthGuard } from './todolist.auth.guard';
@@ -66,5 +67,27 @@ export class TodolistController {
       throw new BadRequestException(`Given todolist ID is not a number`);
     }
     return this.todolistService.delete(id);
+  }
+
+  @UseGuards(TodoListAuthGuard)
+  @Patch('/:todoListId/item/:todoListItemId')
+  public updateItemStatus(
+    @Param('todoListId') todoListId: string,
+    @Param('todoListItemId') todoListItemId: string,
+    @Body() todoListItemStatusPayload: TodoListItemStatusPayload,
+  ): Promise<TodoListItemDTO> {
+    const tlId: number = parseInt(todoListId);
+    if (isNaN(tlId)) {
+      throw new BadRequestException(`Given todolist ID is not a number`);
+    }
+    const tliId: number = parseInt(todoListItemId);
+    if (isNaN(tliId)) {
+      throw new BadRequestException(`Given todolist item ID is not a number`);
+    }
+    return this.todolistService.updateItemStatus(
+      tlId,
+      tliId,
+      todoListItemStatusPayload,
+    );
   }
 }

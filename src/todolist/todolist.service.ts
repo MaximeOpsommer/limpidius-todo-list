@@ -9,6 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   TodoListCreatePayload,
+  TodoListItemStatusPayload,
   TodoListUpdatePayload,
 } from './todolist.payload';
 import { TodoListDTO, TodoListItemDTO } from './todolist.dto';
@@ -30,15 +31,15 @@ export class TodolistService {
   async create(
     todoListCreatePayload: TodoListCreatePayload,
   ): Promise<TodoListDTO> {
-    todoListCreatePayload.items = todoListCreatePayload.items.map(
-      (todoListItemPayload) => {
-        const createdTodoListItem = new this.todoListItemModel(
+    todoListCreatePayload.items = await Promise.all(
+      todoListCreatePayload.items.map(async (todoListItemPayload) => {
+        const createdTodoListItem = await this.todoListItemModel.create(
           todoListItemPayload,
         );
         createdTodoListItem.status = 'TODO';
-        createdTodoListItem.save();
+        await createdTodoListItem.save();
         return createdTodoListItem._id;
-      },
+      }),
     );
     const createdTodolist = await this.todoListModel.create(
       todoListCreatePayload,
@@ -114,5 +115,43 @@ export class TodolistService {
       this.todoListItemModel.findByIdAndDelete(item).exec();
     });
     return result;
+  }
+
+  async updateItemStatus(
+    todoListId: number,
+    todoListItemId: number,
+    todoListItemStatusPayload: TodoListItemStatusPayload,
+  ): Promise<TodoListItemDTO> {
+    const todoList = await this.todoListModel
+      .findOne({ id: todoListId })
+      .populate('items')
+      .exec();
+    if (!todoList) {
+      throw new NotFoundException(
+        `TodoList with ID ${todoListId} does not exist`,
+      );
+    }
+    if (!todoList.items.map((item) => item.id).includes(todoListItemId)) {
+      throw new NotFoundException(
+        `There is no item with ID ${todoListItemId} for todolist with ID ${todoListId}`,
+      );
+    }
+    await this.todoListItemModel
+      .updateOne(
+        {
+          id: todoListItemId,
+        },
+        todoListItemStatusPayload,
+      )
+      .exec();
+    const updatedItem = await this.todoListItemModel
+      .findOne({ id: todoListItemId })
+      .exec();
+    if (!updatedItem) {
+      throw new NotFoundException(
+        `TodoList item with ID ${todoListItemId} does not exist`,
+      );
+    }
+    return mapper.map(updatedItem.toObject(), TodoListItem, TodoListItemDTO);
   }
 }

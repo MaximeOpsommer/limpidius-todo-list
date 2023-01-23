@@ -1,0 +1,11 @@
+{
+  "id": 2,
+  "title": "a TODO list to delete",
+  "items": [
+    {
+      "id": 3,
+      "label": "delete this todo list",
+      "status": "TODO"
+    }
+  ]
+}

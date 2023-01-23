@@ -47,3 +47,5 @@ export type TodoListItemStatus = 'TODO' | 'DONE';
 
 export const TodoListSchema = SchemaFactory.createForClass(TodoList);
 export const TodoListItemSchema = SchemaFactory.createForClass(TodoListItem);
+
+// TodoListItemSchema.post('findOneAndDelete')
