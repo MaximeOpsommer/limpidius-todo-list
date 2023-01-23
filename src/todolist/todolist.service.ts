@@ -40,6 +40,19 @@ export class TodolistService {
     return this.getById(createdTodolist.id);
   }
 
+  async list(): Promise<TodoListDTO[]> {
+    const list = await this.todoListModel.find().exec();
+    return await Promise.all(
+      list.map(async (todolist) => {
+        return mapper.map(
+          (await todolist.populate('items')).toObject(),
+          TodoList,
+          TodoListDTO,
+        );
+      }),
+    );
+  }
+
   async getById(todoListId: number): Promise<TodoListDTO> {
     const todoList = await this.todoListModel.findOne({ id: todoListId });
     if (!todoList) {
@@ -71,7 +84,6 @@ export class TodolistService {
       TodoListDTO,
     );
     deletedTodoList.items.forEach((item) => {
-      console.log(item);
       this.todoListItemModel.findByIdAndDelete(item).exec();
     });
     return result;

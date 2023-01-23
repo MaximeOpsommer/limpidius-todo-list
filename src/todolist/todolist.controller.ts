@@ -25,6 +25,12 @@ export class TodolistController {
     return this.todolistService.create(todolistPayload);
   }
 
+  @UseGuards()
+  @Get('/')
+  public list(): Promise<TodoListDTO[]> {
+    return this.todolistService.list();
+  }
+
   @UseGuards(TodolistAuthGuard)
   @Get('/:id')
   public getById(@Param('id') todolistId: string): Promise<TodoListDTO> {
