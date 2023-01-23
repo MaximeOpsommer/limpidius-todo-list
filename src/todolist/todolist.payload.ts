@@ -2,15 +2,17 @@ import {
   IsArray,
   IsIn,
   IsNotEmpty,
+  IsOptional,
+  IsPositive,
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TodoListItemStatus } from './todolist.schema';
 import { Transform, TransformFnParams, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 
-export class TodolistPayload {
+export class TodoListCreatePayload {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -23,12 +25,25 @@ export class TodolistPayload {
   title: string;
 
   @IsArray()
-  @Type(() => TodoListItemPayload)
+  @Type(() => TodoListItemCreatePayload)
   @ValidateNested()
-  items: TodoListItemPayload[] | Types.ObjectId[];
+  items: TodoListItemCreatePayload[] | Types.ObjectId[];
 }
 
-export class TodoListItemPayload {
+export class TodoListUpdatePayload {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    name: 'title',
+    description: 'The todolist title',
+    type: String,
+    required: true,
+  })
+  @Transform(({ value }: TransformFnParams) => value?.trim())
+  title: string;
+}
+
+export class TodoListItemCreatePayload {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -39,7 +54,21 @@ export class TodoListItemPayload {
   })
   @Transform(({ value }: TransformFnParams) => value?.trim())
   label: string;
+}
 
+export class TodoListItemUpdatedPayload extends TodoListItemCreatePayload {
+  @IsOptional()
+  @IsPositive()
+  @ApiPropertyOptional({
+    name: 'id',
+    description: 'The todolist item id',
+    type: Number,
+    required: false,
+  })
+  id: number;
+}
+
+export class TodoListItemStatusPayload {
   @IsIn(['TODO', 'DONE'])
   @ApiProperty({
     name: 'status',

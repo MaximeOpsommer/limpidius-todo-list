@@ -11,7 +11,7 @@ import { TodolistService } from './todolist.service';
 import { Connection } from 'mongoose';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HeaderInterceptor } from '../app.header.interceptor';
-import { TodolistAuthGuard } from './todolist.auth.guard';
+import { TodoListAuthGuard } from './todolist.auth.guard';
 
 @Module({
   imports: [
@@ -53,7 +53,7 @@ import { TodolistAuthGuard } from './todolist.auth.guard';
     },
     {
       provide: APP_GUARD,
-      useClass: TodolistAuthGuard,
+      useClass: TodoListAuthGuard,
     },
   ],
 })

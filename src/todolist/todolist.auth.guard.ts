@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { BEARER } from '../app.constants';
 
 @Injectable()
-export class TodolistAuthGuard extends AuthGuard('jwt') {
+export class TodoListAuthGuard extends AuthGuard('jwt') {
   constructor(private reflector: Reflector) {
     super();
   }

@@ -1,6 +1,6 @@
 import { TodolistService } from '../../src/todolist/todolist.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TodolistPayload } from '../../src/todolist/todolist.payload';
+import { TodoListCreatePayload } from '../../src/todolist/todolist.payload';
 import { TodoListDTO } from '../../src/todolist/todolist.dto';
 import { Model } from 'mongoose';
 import { TodoListDocument } from '../../src/todolist/todolist.schema';
@@ -19,7 +19,7 @@ describe('TodolistService', () => {
 
   describe('create', () => {
     const payload =
-      require('../payload/create-todolist-payload.json') as TodolistPayload;
+      require('../payload/create-todolist-payload.json') as TodoListCreatePayload;
 
     it('Should create todolist', () => {
       const expected =

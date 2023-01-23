@@ -1,13 +1,13 @@
 import { TodolistController } from '../../src/todolist/todolist.controller';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TodolistService } from '../../src/todolist/todolist.service';
-import { TodolistPayload } from '../../src/todolist/todolist.payload';
+import { TodoListCreatePayload } from '../../src/todolist/todolist.payload';
 import { TodoListDTO } from '../../src/todolist/todolist.dto';
 
 describe('TodolistController', () => {
   let todolistController: TodolistController;
   const fakeTodolistService = {
-    create: (todoListPayload: TodolistPayload): Promise<TodoListDTO> => {
+    create: (todoListPayload: TodoListCreatePayload): Promise<TodoListDTO> => {
       const todolist =
         require('../expected/created-todolist.json') as TodoListDTO;
       return Promise.resolve(todolist);
@@ -28,7 +28,7 @@ describe('TodolistController', () => {
 
   describe('create', () => {
     const payload =
-      require('../payload/create-todolist-payload.json') as TodolistPayload;
+      require('../payload/create-todolist-payload.json') as TodoListCreatePayload;
 
     it('Should call todolist service', () => {
       const expected =

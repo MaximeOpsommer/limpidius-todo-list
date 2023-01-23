@@ -7,7 +7,10 @@ import {
 } from './todolist.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { TodolistPayload } from './todolist.payload';
+import {
+  TodoListCreatePayload,
+  TodoListUpdatePayload,
+} from './todolist.payload';
 import { TodoListDTO, TodoListItemDTO } from './todolist.dto';
 import { createMap } from '@automapper/core';
 import { mapper } from './todolist.mapper';
@@ -24,20 +27,39 @@ export class TodolistService {
     createMap(mapper, TodoListItem, TodoListItemDTO);
   }
 
-  async create(todoListPayload: TodolistPayload): Promise<TodoListDTO> {
-    todoListPayload.items = todoListPayload.items.map((todoListItemPayload) => {
-      const createdTodoListItem = new this.todoListItemModel(
-        todoListItemPayload,
-      );
-      createdTodoListItem.save();
-      return createdTodoListItem._id;
-    });
-    const createdTodolist = new this.todoListModel(todoListPayload);
+  async create(
+    todoListCreatePayload: TodoListCreatePayload,
+  ): Promise<TodoListDTO> {
+    todoListCreatePayload.items = todoListCreatePayload.items.map(
+      (todoListItemPayload) => {
+        const createdTodoListItem = new this.todoListItemModel(
+          todoListItemPayload,
+        );
+        createdTodoListItem.save();
+        return createdTodoListItem._id;
+      },
+    );
+    const createdTodolist = new this.todoListModel(todoListCreatePayload);
     const date = new Date();
     createdTodolist.createdAt = date;
     createdTodolist.updatedAt = date;
     await createdTodolist.save();
     return this.getById(createdTodolist.id);
+  }
+
+  async update(
+    todoListId: number,
+    todoListUpdatePayload: TodoListUpdatePayload,
+  ): Promise<TodoListDTO> {
+    const updatedTodoList = await this.todoListModel
+      .findOneAndUpdate({ id: todoListId }, todoListUpdatePayload)
+      .exec();
+    if (!updatedTodoList) {
+      throw new NotFoundException(
+        `TodoList with ID ${todoListId} does not exist`,
+      );
+    }
+    return this.getById(todoListId);
   }
 
   async list(): Promise<TodoListDTO[]> {
@@ -54,7 +76,9 @@ export class TodolistService {
   }
 
   async getById(todoListId: number): Promise<TodoListDTO> {
-    const todoList = await this.todoListModel.findOne({ id: todoListId });
+    const todoList = await this.todoListModel
+      .findOne({ id: todoListId })
+      .exec();
     if (!todoList) {
       throw new NotFoundException(
         `TodoList with ID ${todoListId} does not exist`,
