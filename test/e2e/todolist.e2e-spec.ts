@@ -208,7 +208,7 @@ describe('TodoListController (e2e)', () => {
         .expect(HttpStatus.BAD_REQUEST);
     });
 
-    it('Should throw a 400 error given ID is not a number', () => {
+    it('Should throw a 400 error when given ID is not a number', () => {
       const payload = {
         title: 'test',
         items: [],
@@ -221,7 +221,7 @@ describe('TodoListController (e2e)', () => {
         .expect(HttpStatus.BAD_REQUEST);
     });
 
-    it('Should throw a 404 error given ID does not exist', () => {
+    it('Should throw a 404 error when given ID does not exist', () => {
       const payload = {
         title: 'test',
         items: [],
@@ -284,10 +284,10 @@ describe('TodoListController (e2e)', () => {
     const todoListId = 1;
     const todoListItemId = 2;
     const url = `/todolist/${todoListId}/item/${todoListItemId}`;
+    const payload =
+      require('../payload/update-todolist-item-status-payload.json') as TodoListItemStatusPayload;
 
     it('Should update todolist item status', async () => {
-      const payload =
-        require('../payload/update-todolist-item-status-payload.json') as TodoListItemStatusPayload;
       const expected =
         require('../expected/updated-todolist-item-status.json') as TodoListItemDTO;
 
@@ -297,6 +297,46 @@ describe('TodoListController (e2e)', () => {
         .send(payload)
         .expect(HttpStatus.OK)
         .expect(expected);
+    });
+
+    it('Should throw a 400 error when given todolist ID is not a number', () => {
+      return request(app.getHttpServer())
+        .patch('/todolist/invalid-id/item/1')
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 400 error when given todolist item ID is not a number', () => {
+      return request(app.getHttpServer())
+        .patch('/todolist/1/item/invalid-item')
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 400 error when given status is invalid', () => {
+      return request(app.getHttpServer())
+        .patch('/todolist/1/item/1')
+        .set('Authorization', BEARER)
+        .send({ status: 'INVALID' })
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('Should throw a 404 error when given todolist ID does not exist', () => {
+      return request(app.getHttpServer())
+        .patch('/todolist/10/item/1')
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('Should throw a 404 error when given todolist item ID does not exist', () => {
+      return request(app.getHttpServer())
+        .patch('/todolist/1/item/10')
+        .set('Authorization', BEARER)
+        .send(payload)
+        .expect(HttpStatus.NOT_FOUND);
     });
   });
 
