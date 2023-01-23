@@ -49,7 +49,6 @@ describe('TodoListController (e2e)', () => {
         .set('Authorization', BEARER)
         .send(payload)
         .expect((res) => {
-          console.log(res.body);
           expect(res.status).toBe(201);
           expect(res.body.items).toHaveLength(2);
           expect(res.body).toEqual(expected);
@@ -138,60 +137,6 @@ describe('TodoListController (e2e)', () => {
           {
             label: ' ',
             status: 'DONE',
-          },
-        ],
-      };
-
-      return request(app.getHttpServer())
-        .post(url)
-        .set('Authorization', BEARER)
-        .send(payload)
-        .expect(400);
-    });
-
-    it('Should throw a 400 error when todolist item status is null', () => {
-      const payload = {
-        title: 'test',
-        items: [
-          {
-            label: 'test',
-            status: null,
-          },
-        ],
-      };
-
-      return request(app.getHttpServer())
-        .post(url)
-        .set('Authorization', BEARER)
-        .send(payload)
-        .expect(400);
-    });
-
-    it('Should throw a 400 error when todolist item status is undefined', () => {
-      const payload = {
-        title: 'test',
-        items: [
-          {
-            label: 'test',
-            status: undefined,
-          },
-        ],
-      };
-
-      return request(app.getHttpServer())
-        .post(url)
-        .set('Authorization', BEARER)
-        .send(payload)
-        .expect(400);
-    });
-
-    it('Should throw a 400 error when todolist item status is invalid', () => {
-      const payload = {
-        title: 'test',
-        items: [
-          {
-            label: 'test',
-            status: 'INVALID',
           },
         ],
       };

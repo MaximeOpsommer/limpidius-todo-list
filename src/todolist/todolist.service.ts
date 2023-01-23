@@ -35,11 +35,14 @@ export class TodolistService {
         const createdTodoListItem = new this.todoListItemModel(
           todoListItemPayload,
         );
+        createdTodoListItem.status = 'TODO';
         createdTodoListItem.save();
         return createdTodoListItem._id;
       },
     );
-    const createdTodolist = new this.todoListModel(todoListCreatePayload);
+    const createdTodolist = await this.todoListModel.create(
+      todoListCreatePayload,
+    );
     const date = new Date();
     createdTodolist.createdAt = date;
     createdTodolist.updatedAt = date;
