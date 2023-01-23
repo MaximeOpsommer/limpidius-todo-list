@@ -65,10 +65,15 @@ export class TodolistService {
         `TodoList with ID ${todoListId} does not exist`,
       );
     }
-    return mapper.map(
+    const result = mapper.map(
       (await deletedTodoList.populate('items')).toObject(),
       TodoList,
       TodoListDTO,
     );
+    deletedTodoList.items.forEach((item) => {
+      console.log(item);
+      this.todoListItemModel.findByIdAndDelete(item).exec();
+    });
+    return result;
   }
 }
