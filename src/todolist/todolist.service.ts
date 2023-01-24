@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   TodoList,
   TodoListDocument,
@@ -18,6 +18,8 @@ import { mapper } from './todolist.mapper';
 
 @Injectable()
 export class TodolistService {
+  private readonly logger = new Logger(TodolistService.name);
+
   constructor(
     @InjectModel(TodoList.name)
     private todoListModel: Model<TodoListDocument>,
@@ -31,6 +33,11 @@ export class TodolistService {
   async create(
     todoListCreatePayload: TodoListCreatePayload,
   ): Promise<TodoListDTO> {
+    this.logger.debug(
+      `Request to create todolist with payload ${JSON.stringify(
+        todoListCreatePayload,
+      )}`,
+    );
     todoListCreatePayload.items = await Promise.all(
       todoListCreatePayload.items.map(async (todoListItemPayload) => {
         const createdTodoListItem = await this.todoListItemModel.create(
@@ -55,6 +62,11 @@ export class TodolistService {
     todoListId: number,
     todoListUpdatePayload: TodoListUpdatePayload,
   ): Promise<TodoListDTO> {
+    this.logger.debug(
+      `Request to update todolist with payload ${JSON.stringify(
+        todoListUpdatePayload,
+      )}`,
+    );
     const updatedTodoList = await this.todoListModel
       .findOneAndUpdate({ id: todoListId }, todoListUpdatePayload)
       .exec();
@@ -67,6 +79,7 @@ export class TodolistService {
   }
 
   async list(): Promise<TodoListDTO[]> {
+    this.logger.debug(`Request to fetch todolists`);
     const list = await this.todoListModel.find().exec();
     return await Promise.all(
       list.map(async (todolist) => {
@@ -80,6 +93,7 @@ export class TodolistService {
   }
 
   async getById(todoListId: number): Promise<TodoListDTO> {
+    this.logger.debug(`Request to get todolist by ID ${todoListId}`);
     const todoList = await this.todoListModel
       .findOne({ id: todoListId })
       .exec();
@@ -96,6 +110,7 @@ export class TodolistService {
   }
 
   async delete(todoListId: number): Promise<TodoListDTO> {
+    this.logger.debug(`Request to delete todolist with ID ${todoListId}`);
     const deletedTodoList = await this.todoListModel
       .findOneAndDelete({
         id: todoListId,
@@ -122,6 +137,11 @@ export class TodolistService {
     todoListItemId: number,
     todoListItemStatusPayload: TodoListItemStatusPayload,
   ): Promise<TodoListItemDTO> {
+    this.logger.debug(
+      `Request to update todolist with ID ${todoListId} item with ID ${todoListItemId} status with payload ${JSON.stringify(
+        todoListItemStatusPayload,
+      )}`,
+    );
     const todoList = await this.todoListModel
       .findOne({ id: todoListId })
       .populate('items')
