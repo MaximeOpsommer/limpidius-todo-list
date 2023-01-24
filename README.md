@@ -26,13 +26,31 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Limpidius TodoList
+
+For this test, I used the following tools:
+- Nestjs (required)
+- Mongoose (for the mongo database)
+- AutoMapper (for the map between mongoose schemas and returned DTOs)
+- mongodb-memory-server (to run a mongo server in memory for the e2e tests)
+- docker-compose to run easily a local mongodb
+
 ## Installation
 
+First install the dependencies:
 ```bash
 $ npm install
 ```
 
 ## Running the app
+
+Before starting the server, make sure your port `27017` is free before running the mongo image:
+
+```bash
+$ docker-compose up -d
+```
+
+Now you can start the server
 
 ```bash
 # development
@@ -46,6 +64,8 @@ $ npm run start:prod
 ```
 
 ## Test
+
+For the tests, you don't have to worry about the mongodb, we use the `mongodb-memory-server` library
 
 ```bash
 # unit tests
