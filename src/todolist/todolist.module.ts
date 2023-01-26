@@ -10,7 +10,7 @@ import { TodolistController } from './todolist.controller';
 import { TodolistService } from './todolist.service';
 import { Connection } from 'mongoose';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { HeaderInterceptor } from '../app.header.interceptor';
+import { HeaderInterceptor } from './todolist.header.interceptor';
 import { TodoListAuthGuard } from './todolist.auth.guard';
 
 @Module({

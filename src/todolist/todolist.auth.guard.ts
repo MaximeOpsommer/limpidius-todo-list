@@ -2,7 +2,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { BEARER } from '../app.constants';
+import { BEARER } from './todolist.constants';
 
 @Injectable()
 export class TodoListAuthGuard extends AuthGuard('jwt') {
