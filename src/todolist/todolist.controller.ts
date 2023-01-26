@@ -75,7 +75,7 @@ export class TodolistController {
     @Param('todoListId') todoListId: string,
     @Param('todoListItemId') todoListItemId: string,
     @Body() todoListItemStatusPayload: TodoListItemStatusPayload,
-  ): Promise<TodoListItemDTO> {
+  ): Promise<TodoListDTO> {
     const tlId: number = parseInt(todoListId);
     if (isNaN(tlId)) {
       throw new BadRequestException(`Given todolist ID is not a number`);

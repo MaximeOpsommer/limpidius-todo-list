@@ -1,10 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import {
-  TodoList,
-  TodoListDocument,
-  TodoListItem,
-  TodoListItemDocument,
-} from './todolist.schema';
+import { TodoList, TodoListDocument, TodoListItem } from './todolist.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -23,8 +18,6 @@ export class TodolistService {
   constructor(
     @InjectModel(TodoList.name)
     private todoListModel: Model<TodoListDocument>,
-    @InjectModel(TodoListItem.name)
-    private todoListItemModel: Model<TodoListItemDocument>,
   ) {
     createMap(mapper, TodoList, TodoListDTO);
     createMap(mapper, TodoListItem, TodoListItemDTO);
@@ -38,24 +31,17 @@ export class TodolistService {
         todoListCreatePayload,
       )}`,
     );
-    todoListCreatePayload.items = await Promise.all(
-      todoListCreatePayload.items.map(async (todoListItemPayload) => {
-        const createdTodoListItem = await this.todoListItemModel.create(
-          todoListItemPayload,
-        );
-        createdTodoListItem.status = 'TODO';
-        await createdTodoListItem.save();
-        return createdTodoListItem._id;
-      }),
-    );
     const createdTodolist = await this.todoListModel.create(
       todoListCreatePayload,
     );
+    createdTodolist.items.forEach((item) => {
+      item.status = 'TODO';
+    });
     const date = new Date();
     createdTodolist.createdAt = date;
     createdTodolist.updatedAt = date;
     await createdTodolist.save();
-    return this.getById(createdTodolist.id);
+    return mapper.map(createdTodolist.toObject(), TodoList, TodoListDTO);
   }
 
   async update(
@@ -67,15 +53,45 @@ export class TodolistService {
         todoListUpdatePayload,
       )}`,
     );
-    const updatedTodoList = await this.todoListModel
-      .findOneAndUpdate({ id: todoListId }, todoListUpdatePayload)
+    const todoList = await this.todoListModel
+      .findOne({ id: todoListId })
       .exec();
-    if (!updatedTodoList) {
+    if (!todoList) {
+      this.logger.error(
+        `Tried to update todolist with ID ${todoListId} but it doesn't exist`,
+      );
       throw new NotFoundException(
         `TodoList with ID ${todoListId} does not exist`,
       );
     }
-    return this.getById(todoListId);
+    const itemIds = todoList.items.map((item) => item.id);
+    const itemPayloadIds = todoListUpdatePayload.items
+      .map((item) => item.id)
+      .filter((itemId) => itemId !== undefined);
+    const notExistingItemIds = itemPayloadIds.filter(
+      (i) => !itemIds.includes(i!),
+    );
+
+    if (notExistingItemIds.length) {
+      this.logger.error(
+        `Tried to update todolist with ID ${todoListId} and given payload ${JSON.stringify(
+          todoListUpdatePayload,
+        )}, but following item ids doesn't exist ${notExistingItemIds}`,
+      );
+      throw new NotFoundException(
+        `TodoList with ID ${todoListId} does not contain item with ID ${notExistingItemIds}`,
+      );
+    }
+
+    todoListUpdatePayload.items.forEach((itemPayload) => {
+      const item = todoList.items.find((item) => item.id === itemPayload.id);
+      item!.label = itemPayload.label;
+    });
+
+    todoList.title = todoListUpdatePayload.title;
+    todoList.updatedAt = new Date();
+    await todoList.save();
+    return mapper.map(todoList.toObject(), TodoList, TodoListDTO);
   }
 
   async list(): Promise<TodoListDTO[]> {
@@ -98,80 +114,66 @@ export class TodolistService {
       .findOne({ id: todoListId })
       .exec();
     if (!todoList) {
+      this.logger.error(
+        `Tried to get todolist with ID ${todoListId} but it doesn't exist`,
+      );
       throw new NotFoundException(
         `TodoList with ID ${todoListId} does not exist`,
       );
     }
-    return mapper.map(
-      (await todoList.populate('items')).toObject(),
-      TodoList,
-      TodoListDTO,
-    );
+    return mapper.map(todoList.toObject(), TodoList, TodoListDTO);
   }
 
   async delete(todoListId: number): Promise<TodoListDTO> {
     this.logger.debug(`Request to delete todolist with ID ${todoListId}`);
     const deletedTodoList = await this.todoListModel
-      .findOneAndDelete({
-        id: todoListId,
-      })
+      .findOneAndDelete({ id: todoListId })
       .exec();
     if (!deletedTodoList) {
+      this.logger.error(
+        `Tried to delete todolist with ID ${todoListId} but it doesn't exist`,
+      );
       throw new NotFoundException(
         `TodoList with ID ${todoListId} does not exist`,
       );
     }
-    const result = mapper.map(
-      (await deletedTodoList.populate('items')).toObject(),
-      TodoList,
-      TodoListDTO,
-    );
-    deletedTodoList.items.forEach((item) => {
-      this.todoListItemModel.findByIdAndDelete(item).exec();
-    });
-    return result;
+    return mapper.map(deletedTodoList.toObject(), TodoList, TodoListDTO);
   }
 
   async updateItemStatus(
     todoListId: number,
     todoListItemId: number,
     todoListItemStatusPayload: TodoListItemStatusPayload,
-  ): Promise<TodoListItemDTO> {
+  ): Promise<TodoListDTO> {
     this.logger.debug(
       `Request to update todolist with ID ${todoListId} item with ID ${todoListItemId} status with payload ${JSON.stringify(
         todoListItemStatusPayload,
       )}`,
     );
     const todoList = await this.todoListModel
-      .findOne({ id: todoListId })
-      .populate('items')
+      .findOne({ id: todoListId, 'items.id': todoListItemId })
       .exec();
     if (!todoList) {
+      this.logger.error(
+        `Tried to update todolist item status with ID ${todoListId} but todoList with ID ${todoListId} does not exist`,
+      );
       throw new NotFoundException(
         `TodoList with ID ${todoListId} does not exist`,
       );
     }
-    if (!todoList.items.map((item) => item.id).includes(todoListItemId)) {
+    const todoListItem = todoList.items.find(
+      (item) => item.id === todoListItemId,
+    );
+    if (!todoListItem) {
+      this.logger.error(
+        `Tried to update todolist item status with ID ${todoListItemId} but it doesn't exist`,
+      );
       throw new NotFoundException(
         `There is no item with ID ${todoListItemId} for todolist with ID ${todoListId}`,
       );
     }
-    await this.todoListItemModel
-      .updateOne(
-        {
-          id: todoListItemId,
-        },
-        todoListItemStatusPayload,
-      )
-      .exec();
-    const updatedItem = await this.todoListItemModel
-      .findOne({ id: todoListItemId })
-      .exec();
-    if (!updatedItem) {
-      throw new NotFoundException(
-        `TodoList item with ID ${todoListItemId} does not exist`,
-      );
-    }
-    return mapper.map(updatedItem.toObject(), TodoListItem, TodoListItemDTO);
+    todoListItem!.status = todoListItemStatusPayload.status;
+    await todoList.save();
+    return mapper.map(todoList.toObject(), TodoList, TodoListDTO);
   }
 }

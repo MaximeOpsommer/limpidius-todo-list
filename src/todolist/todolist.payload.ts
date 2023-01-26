@@ -2,15 +2,13 @@ import {
   IsArray,
   IsIn,
   IsNotEmpty,
-  IsOptional,
   IsPositive,
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { TodoListItemStatus } from './todolist.schema';
 import { Transform, TransformFnParams, Type } from 'class-transformer';
-import { Types } from 'mongoose';
 
 export class TodoListCreatePayload {
   @IsString()
@@ -27,7 +25,7 @@ export class TodoListCreatePayload {
   @IsArray()
   @Type(() => TodoListItemCreatePayload)
   @ValidateNested()
-  items: TodoListItemCreatePayload[] | Types.ObjectId[];
+  items: TodoListItemCreatePayload[];
 }
 
 export class TodoListUpdatePayload {
@@ -41,6 +39,11 @@ export class TodoListUpdatePayload {
   })
   @Transform(({ value }: TransformFnParams) => value?.trim())
   title: string;
+
+  @IsArray()
+  @Type(() => TodoListItemUpdatedPayload)
+  @ValidateNested()
+  items: TodoListItemUpdatedPayload[];
 }
 
 export class TodoListItemCreatePayload {
@@ -57,13 +60,12 @@ export class TodoListItemCreatePayload {
 }
 
 export class TodoListItemUpdatedPayload extends TodoListItemCreatePayload {
-  @IsOptional()
   @IsPositive()
-  @ApiPropertyOptional({
+  @ApiProperty({
     name: 'id',
     description: 'The todolist item id',
     type: Number,
-    required: false,
+    required: true,
   })
   id: number;
 }

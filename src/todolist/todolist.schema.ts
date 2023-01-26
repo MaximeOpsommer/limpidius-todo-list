@@ -1,11 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AutoMap } from '@automapper/classes';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
 export type TodoListDocument = HydratedDocument<TodoList>;
-export type TodoListItemDocument = HydratedDocument<TodoListItem>;
 
-@Schema()
+@Schema({ collection: 'todolist' })
 export class TodoListItem {
   @Prop(Number)
   @AutoMap()
@@ -20,7 +19,9 @@ export class TodoListItem {
   status: TodoListItemStatus;
 }
 
-@Schema()
+export const TodoListItemSchema = SchemaFactory.createForClass(TodoListItem);
+
+@Schema({ collection: 'todolist' })
 export class TodoList {
   @Prop(Number)
   @AutoMap()
@@ -31,7 +32,7 @@ export class TodoList {
   title: string;
 
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TodoListItem' }],
+    type: [TodoListItemSchema],
   })
   @AutoMap(() => TodoListItem)
   items: TodoListItem[];
@@ -46,6 +47,3 @@ export class TodoList {
 export type TodoListItemStatus = 'TODO' | 'DONE';
 
 export const TodoListSchema = SchemaFactory.createForClass(TodoList);
-export const TodoListItemSchema = SchemaFactory.createForClass(TodoListItem);
-
-// TodoListItemSchema.post('findOneAndDelete')

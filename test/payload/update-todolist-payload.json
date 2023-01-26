@@ -1,3 +1,13 @@
 {
-  "title": "  My renamed TODO list  "
+  "title": "  My renamed TODO list  ",
+  "items": [
+    {
+      "id": 2,
+      "label": "  renamed Task 1  "
+    },
+    {
+      "id": 1,
+      "label": "  renamed Task 2  "
+    }
+  ]
 }

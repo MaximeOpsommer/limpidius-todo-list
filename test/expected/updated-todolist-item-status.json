@@ -1,5 +1,16 @@
 {
-  "id": 2,
-  "label": "Task 1",
-  "status": "DONE"
+  "id": 1,
+  "title": "My renamed TODO list",
+  "items": [
+    {
+      "id": 2,
+      "label": "renamed Task 1",
+      "status": "DONE"
+    },
+    {
+      "id": 1,
+      "label": "renamed Task 2",
+      "status": "TODO"
+    }
+  ]
 }
